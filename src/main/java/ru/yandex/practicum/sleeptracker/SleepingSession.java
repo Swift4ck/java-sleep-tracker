@@ -50,7 +50,7 @@ public class SleepingSession {
             nightStart = nightStart.plusDays(1);
         }
         return false;// посути этот метод првоеряет явялется ли сессия сна ночной, если да то возрашает ложь, если сессия ночная то истина
-    } 
+    }
 
 
 }
