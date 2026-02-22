@@ -1,12 +1,12 @@
 package ru.yandex.practicum.sleeptracker;
 
-import analyzers.analyzers.TotalSessions;
-import analyzers.analyzers.MaxDuration;
-import analyzers.analyzers.MinDuration;
-import analyzers.analyzers.AverageTimeSession;
-import analyzers.analyzers.SessionBadSleep;
-import analyzers.analyzers.SleeplessNights;
-import analyzers.analyzers.CheckClass;
+import analyzers.Analyzers.TotalSessions;
+import analyzers.Analyzers.MaxDuration;
+import analyzers.Analyzers.MinDuration;
+import analyzers.Analyzers.AverageTimeSession;
+import analyzers.Analyzers.SessionBadSleep;
+import analyzers.Analyzers.SleeplessNights;
+import analyzers.Analyzers.CheckClass;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;

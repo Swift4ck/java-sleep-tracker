@@ -1,12 +1,12 @@
 package ru.yandex.practicum.sleeptracker;
 
-import analyzers.analyzers.TotalSessions;
-import analyzers.analyzers.MaxDuration;
-import analyzers.analyzers.MinDuration;
-import analyzers.analyzers.AverageTimeSession;
-import analyzers.analyzers.SessionBadSleep;
-import analyzers.analyzers.SleeplessNights;
-import analyzers.analyzers.CheckClass;
+import analyzers.Analyzers.TotalSessions;
+import analyzers.Analyzers.MaxDuration;
+import analyzers.Analyzers.MinDuration;
+import analyzers.Analyzers.AverageTimeSession;
+import analyzers.Analyzers.SessionBadSleep;
+import analyzers.Analyzers.SleeplessNights;
+import analyzers.Analyzers.CheckClass;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 
 
 public class SleepTrackerApp {
-    private static final List<Function<List<SleepingSession>, SleepAnalysisResult>> analyzers = Arrays.asList(
+    private static final List<Function<List<SleepingSession>, SleepAnalysisResult>> Analyzers = Arrays.asList(
             new TotalSessions(),
             new MaxDuration(),
             new MinDuration(),
@@ -47,7 +47,7 @@ public class SleepTrackerApp {
                     })
                     .collect(Collectors.toList());
 
-            analyzers.stream()
+            Analyzers.stream()
                     .map(analyzer -> analyzer.apply(sleepingSessions))
                     .forEach(System.out::println);
 

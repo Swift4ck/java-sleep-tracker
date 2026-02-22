@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public interface analyzers {
+public interface Analyzers {
 
     public class TotalSessions implements Function<List<SleepingSession>, SleepAnalysisResult> {
         private static final String description = "Всего сессий сна: ";
