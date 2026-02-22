@@ -28,7 +28,7 @@ public class SleepingSession {
     }
 
 
-    public boolean isNightSession() {//метод определяющий ночной сон
+    public boolean isNightSession() {
 
         //Распишу что бы показать что понял как работает метод
         LocalDateTime start = getStart(); //выставляем начало сесси сна
@@ -49,8 +49,8 @@ public class SleepingSession {
             }
             nightStart = nightStart.plusDays(1);
         }
-        return false;
-    }// посути этот метод првоеряет явялется ли сессия сна ночной, если да то возрашает ложь, если сессия ночная то истина
+        return false;// посути этот метод првоеряет явялется ли сессия сна ночной, если да то возрашает ложь, если сессия ночная то истина
+    } /
 
 
 }
