@@ -1,18 +1,17 @@
 package ru.yandex.practicum.sleeptracker;
 
+import analyzers.analyzers.TotalSessions;
+import analyzers.analyzers.MaxDuration;
+import analyzers.analyzers.MinDuration;
+import analyzers.analyzers.AverageTimeSession;
+import analyzers.analyzers.SessionBadSleep;
+import analyzers.analyzers.SleeplessNights;
+import analyzers.analyzers.CheckClass;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import ANALYZERS.ANALYZERS;
 import org.junit.jupiter.api.Test;
-import ANALYZERS.ANALYZERS.TotalSessions;
-import ANALYZERS.ANALYZERS.MaxDuration;
-import ANALYZERS.ANALYZERS.MinDuration;
-import ANALYZERS.ANALYZERS.AverageTimeSession;
-import ANALYZERS.ANALYZERS.SessionBadSleep;
-import ANALYZERS.ANALYZERS.SleeplessNights;
-import ANALYZERS.ANALYZERS.CheckClass;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -188,6 +187,38 @@ public class SleepTrackerAppTest {
 
         assertEquals(2, (long) result.getValue());
         //Вернет что была 2 без сонные ночи
+    }
+
+    @Test
+    public void thereWillBeNoSleepyNights() {
+        List<SleepingSession> sleepingSessions = new ArrayList<>();
+        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 31,
+                23, 0, 0, 0),
+                LocalDateTime.of(2000, 1, 31, 8, 0, 0, 0), "не бессоная"));
+
+        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 2, 1,
+                23, 0, 0, 0),
+                LocalDateTime.of(2000, 2, 2, 8, 0, 0, 0), "не бессоная"));
+
+        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 2, 3,
+                8, 0, 0, 0),
+                LocalDateTime.of(2000, 2, 2, 8, 30, 0, 0), "бессоная"));
+
+        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 2, 3,
+                20, 0, 0, 0),
+                LocalDateTime.of(2000, 2, 4, 5, 0, 0, 0), "не бессоная"));
+
+        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 2, 5,
+                8, 0, 0, 0),
+                LocalDateTime.of(2000, 2, 5, 8, 30, 0, 0), "бессоная"));
+
+
+        SleeplessNights countNoNightSleep = new SleeplessNights();
+
+        SleepAnalysisResult result = countNoNightSleep.apply(sleepingSessions);
+
+        assertEquals(3, (long) result.getValue());
+        //Вернет что было 3 бессоной ночи не смотря на смена месяца
     }
 
 

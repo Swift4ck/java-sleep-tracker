@@ -1,4 +1,4 @@
-package ANALYZERS;
+package analyzers;
 
 import ru.yandex.practicum.sleeptracker.SleepAnalysisResult;
 import ru.yandex.practicum.sleeptracker.SleepingSession;
@@ -12,20 +12,19 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public interface ANALYZERS {
-
+public interface analyzers {
 
     public class TotalSessions implements Function<List<SleepingSession>, SleepAnalysisResult> {
-        private static final String DESCRIPTION = "Всего сессий сна: ";
+        private static final String description = "Всего сессий сна: ";
 
         @Override
         public SleepAnalysisResult apply(List<SleepingSession> sessions) {
-            return new SleepAnalysisResult(DESCRIPTION, sessions.size());
+            return new SleepAnalysisResult(description, sessions.size());
         }
     }
 
     static class MaxDuration implements Function<List<SleepingSession>, SleepAnalysisResult> {
-        private static final String DESCRIPTION = "Максимальная сессия сна: ";
+        private static final String description = "Максимальная сессия сна: ";
 
         @Override
         public SleepAnalysisResult apply(List<SleepingSession> sessions) {
@@ -34,12 +33,12 @@ public interface ANALYZERS {
                             session.getEnd()))
                     .max()
                     .orElse(0);
-            return new SleepAnalysisResult(DESCRIPTION, maxDuartion);
+            return new SleepAnalysisResult(description, maxDuartion);
         }
     }
 
     static class MinDuration implements Function<List<SleepingSession>, SleepAnalysisResult> {
-        private static final String DESCRIPTION = "Минимальная сессия сна: ";
+        private static final String description = "Минимальная сессия сна: ";
 
         @Override
         public SleepAnalysisResult apply(List<SleepingSession> sessions) {
@@ -48,13 +47,13 @@ public interface ANALYZERS {
                             session.getEnd()))
                     .min()
                     .orElse(0);
-            return new SleepAnalysisResult(DESCRIPTION, minDuartion);
+            return new SleepAnalysisResult(description, minDuartion);
         }
     }
 
 
     static class AverageTimeSession implements Function<List<SleepingSession>, SleepAnalysisResult> {
-        private static final String DESCRIPTION = "Среднее сессия сна: ";
+        private static final String description = "Среднее сессия сна: ";
 
         @Override
         public SleepAnalysisResult apply(List<SleepingSession> sessions) {
@@ -64,13 +63,13 @@ public interface ANALYZERS {
                     .average()
                     .orElse(0);
 
-            return new SleepAnalysisResult(DESCRIPTION, maxDuartion);
+            return new SleepAnalysisResult(description, maxDuartion);
         }
     }
 
 
     static class SessionBadSleep implements Function<List<SleepingSession>, SleepAnalysisResult> {
-        private static final String DESCRIPTION = "Количество плохих сессий сна: ";
+        private static final String description = "Количество плохих сессий сна: ";
 
         @Override
         public SleepAnalysisResult apply(List<SleepingSession> sessions) {
@@ -78,19 +77,19 @@ public interface ANALYZERS {
                     .filter(session -> session.getStatus().equals("BAD"))
                     .count();
 
-            return new SleepAnalysisResult(DESCRIPTION, badSession);
+            return new SleepAnalysisResult(description, badSession);
         }
     }
 
     public class SleeplessNights implements Function<List<SleepingSession>, SleepAnalysisResult> {
 
 
-        private static final String DESCRIPTION = "Бессонных ночей: ";
+        private static final String description = "Бессонных ночей: ";
 
         @Override
         public SleepAnalysisResult apply(List<SleepingSession> sessions) {
             if (sessions.isEmpty()) {
-                return new SleepAnalysisResult(DESCRIPTION, 0);
+                return new SleepAnalysisResult(description, 0);
             }
 
             LocalDateTime firstStart = sessions.get(0).getStart();
@@ -110,7 +109,7 @@ public interface ANALYZERS {
                     .collect(Collectors.toSet());
 
             long sleeplessNights = totalNights - nightsWithSleep.size();
-            return new SleepAnalysisResult(DESCRIPTION, Math.max(0, sleeplessNights));
+            return new SleepAnalysisResult(description, Math.max(0, sleeplessNights));
         }
 
         private LocalDate getNightDate(SleepingSession session) {
@@ -122,7 +121,7 @@ public interface ANALYZERS {
     }
 
     public class CheckClass implements Function<List<SleepingSession>, SleepAnalysisResult> {
-        String DESCRIPTION = "Бессонных ночей";
+        String description = "Бессонных ночей";
 
 
         @Override
@@ -136,7 +135,7 @@ public interface ANALYZERS {
                         LocalDateTime endNight = nightStart.plusHours(6);
 
 
-                        return (start.isAfter(nightStart) && end.isAfter(endNight))||
+                        return (start.isAfter(nightStart) && end.isAfter(endNight)) ||
                                 (start.isAfter(nightStart) && end.isBefore(endNight));
 
                     })
@@ -148,10 +147,9 @@ public interface ANALYZERS {
                         LocalDateTime endOwl = end.toLocalDate().atTime(9, 0);
                         //И здесь вроде была ошибка, он проверял тот же день и получалось что допустим час ночи находился позже 22 часов вечера
                         //Вообще как лучше делать такие проверки, что бы учитывались дни?
-                        if (end.getDayOfMonth() > start.getDayOfMonth()){
+                        if (end.getDayOfMonth() > start.getDayOfMonth()) {
                             startOwl = start.toLocalDate().atTime(23, 0).minusDays(1);
-                        }
-                        else {
+                        } else {
                             startOwl = start.toLocalDate().atTime(23, 0);
                         }
 
@@ -219,19 +217,19 @@ public interface ANALYZERS {
 
 
             if (owlCount > larkCount && owlCount > pigeonCount) {
-                DESCRIPTION = "Ваш хронотип сова, вы засыпали позже 23;00, а пробуждение после 9:00, столько раз: ";
-                return new SleepAnalysisResult(DESCRIPTION, owlCount);
+                description = "Ваш хронотип сова, вы засыпали позже 23;00, а пробуждение после 9:00, столько раз: ";
+                return new SleepAnalysisResult(description, owlCount);
             } else if (larkCount > owlCount && larkCount > pigeonCount) {
-                DESCRIPTION = "Ваш хронотип жаворонок, вы ложились, раньше 22:00 " +
+                description = "Ваш хронотип жаворонок, вы ложились, раньше 22:00 " +
                         "и просыпались до 7:00, вот сколько раз: ";
-                return new SleepAnalysisResult(DESCRIPTION, larkCount);
+                return new SleepAnalysisResult(description, larkCount);
             } else if (pigeonCount > larkCount && pigeonCount > owlCount) {
-                DESCRIPTION = "Ваш хронотип голубь, вы ложились  спать в другое время в " +
+                description = "Ваш хронотип голубь, вы ложились  спать в другое время в " +
                         "отличие от сов и жаворонков, такое кол-во раз: ";
-                return new SleepAnalysisResult(DESCRIPTION, pigeonCount);
+                return new SleepAnalysisResult(description, pigeonCount);
             } else {
-                DESCRIPTION = "Ваш хронотип голубь, вы ложились одинаково как сова и жаворонок, такое кол-во раз: ";
-                return new SleepAnalysisResult(DESCRIPTION, pigeonCount + owlCount);
+                description = "Ваш хронотип голубь, вы ложились одинаково как сова и жаворонок, такое кол-во раз: ";
+                return new SleepAnalysisResult(description, pigeonCount + owlCount);
             }
         }
 
