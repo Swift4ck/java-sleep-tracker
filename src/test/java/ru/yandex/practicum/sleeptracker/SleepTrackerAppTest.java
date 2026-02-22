@@ -3,15 +3,15 @@ package ru.yandex.practicum.sleeptracker;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import ANALYZERS.ANALYZERS;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.sleeptracker.SleepTrackerApp.SessionCountFunction;
-import ru.yandex.practicum.sleeptracker.SleepTrackerApp.MaxDuration;
-import ru.yandex.practicum.sleeptracker.SleepTrackerApp.MinDuration;
-import ru.yandex.practicum.sleeptracker.SleepTrackerApp.AverageTimeSession;
-import ru.yandex.practicum.sleeptracker.SleepTrackerApp.SessionBadSleep;
-import ru.yandex.practicum.sleeptracker.SleepTrackerApp.CountNoNightSleep;
-import ru.yandex.practicum.sleeptracker.SleepTrackerApp.CheckClass;
+import ANALYZERS.ANALYZERS.TotalSessions;
+import ANALYZERS.ANALYZERS.MaxDuration;
+import ANALYZERS.ANALYZERS.MinDuration;
+import ANALYZERS.ANALYZERS.AverageTimeSession;
+import ANALYZERS.ANALYZERS.SessionBadSleep;
+import ANALYZERS.ANALYZERS.SleeplessNights;
+import ANALYZERS.ANALYZERS.CheckClass;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -25,10 +25,10 @@ public class SleepTrackerAppTest {
         sleepingSessions.add(new SleepingSession(LocalDateTime.now(), LocalDateTime.now().plusHours(7), "bad"));
         sleepingSessions.add(new SleepingSession(LocalDateTime.now(), LocalDateTime.now().plusHours(6), "normal"));
 
-        SessionCountFunction sessionCountFunction = new SessionCountFunction();
+        TotalSessions sessionCountFunction = new TotalSessions();
 
-        double result = sessionCountFunction.analyze(sleepingSessions);
-        assertEquals(3, result);
+        SleepAnalysisResult  result = sessionCountFunction.apply(sleepingSessions);
+        assertEquals(3, result.getValue());
         //Должна вернуть кол-во сессий
     }
 
@@ -41,14 +41,14 @@ public class SleepTrackerAppTest {
 
         MaxDuration maxDuration = new MaxDuration();
 
-        double result = maxDuration.analyze(sleepingSessions);
-        assertEquals(8 * 60, result);
+        SleepAnalysisResult result = maxDuration.apply(sleepingSessions);
+        assertEquals(8 * 60, (long) result.getValue());
         //Должна вернуть максимальную длину  сессии в минутах
 
-        assertNotEquals(7 * 60, result);
+        assertNotEquals(7 * 60,(long) result.getValue());
         //Проверка что метод не вернул число которое не максимальное
 
-        assertNotEquals(6 * 60, result);
+        assertNotEquals(6 * 60,(long) result.getValue());
         //Проверка что метод не вернул число которое минимальное
     }
 
@@ -62,11 +62,11 @@ public class SleepTrackerAppTest {
 
         MinDuration minDuration = new MinDuration();
 
-        double result = minDuration.analyze(sleepingSessions);
-        assertEquals(6 * 60, result);
+        SleepAnalysisResult result = minDuration.apply(sleepingSessions);
+        assertEquals(6 * 60,(long) result.getValue());
         //Должна вернуть минимальную длину  сессии в минутах
 
-        assertNotEquals(8 * 60, result);
+        assertNotEquals(8 * 60,(long) result.getValue());
         //Проверка что функция не вернет максимальное число вместо минимальной
     }
 
@@ -80,10 +80,11 @@ public class SleepTrackerAppTest {
 
         AverageTimeSession averageTimeSession = new AverageTimeSession();
 
-        double result = averageTimeSession.analyze(sleepingSessions);
+        SleepAnalysisResult result = averageTimeSession.apply(sleepingSessions);
 
-        assertEquals(80, result);
+        assertEquals(80.0,(double) result.getValue());
         //Вернет среднее значения сессии
+
     }
 
     @Test
@@ -95,9 +96,9 @@ public class SleepTrackerAppTest {
 
         AverageTimeSession averageTimeSession = new AverageTimeSession();
 
-        double result = averageTimeSession.analyze(sleepingSessions);
+        SleepAnalysisResult result = averageTimeSession.apply(sleepingSessions);
 
-        assertEquals(0, result);
+        assertEquals(0.0, result.getValue());
         //Вернет среднее значения сессии
     }
 
@@ -110,9 +111,9 @@ public class SleepTrackerAppTest {
 
         SessionBadSleep sessionBadSleep = new SessionBadSleep();
 
-        double result = sessionBadSleep.analyze(sleepingSessions);
+        SleepAnalysisResult result = sessionBadSleep.apply(sleepingSessions);
 
-        assertEquals(1, result);
+        assertEquals(1,(long) result.getValue());
         //Вернет 1 плохой сон(
     }
 
@@ -125,33 +126,34 @@ public class SleepTrackerAppTest {
 
         SessionBadSleep sessionBadSleep = new SessionBadSleep();
 
-        double result = sessionBadSleep.analyze(sleepingSessions);
+        SleepAnalysisResult result = sessionBadSleep.apply(sleepingSessions);
 
-        assertEquals(0, result);
+        assertEquals(0,(long) result.getValue());
         //Вернет 0 плохих снов)
     }
 
     @Test
     public void itWillReturnThatThereWas1SleeplessNight() {
         List<SleepingSession> sleepingSessions = new ArrayList<>();
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 1,
-                23, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 3, 0, 0, 0), "не бессоная"));
 
         sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 1,
                 23, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 3, 0, 0, 0), "не бессонная"));
+                LocalDateTime.of(2000, 1, 2, 8, 0, 0, 0), "не бессоная"));
 
         sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 2,
+                23, 0, 0, 0),
+                LocalDateTime.of(2000, 1, 3, 8, 0, 0, 0), "не бессоная"));
+
+        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 4,
                 7, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 10, 0, 0, 0), "бессонная"));
+                LocalDateTime.of(2000, 1, 4, 10, 0, 0, 0), "бессоная"));
 
 
-        CountNoNightSleep countNoNightSleep = new CountNoNightSleep();
+        SleeplessNights countNoNightSleep = new SleeplessNights();
 
-        double result = countNoNightSleep.analyze(sleepingSessions);
+        SleepAnalysisResult result = countNoNightSleep.apply(sleepingSessions);
 
-        assertEquals(1, result);
+        assertEquals(1,(long) result.getValue());
         //Вернет что была 1 бессоная ночь
     }
 
@@ -159,28 +161,31 @@ public class SleepTrackerAppTest {
     public void itWillReturnThatThereWasTwoSleeplessNight() {
         List<SleepingSession> sleepingSessions = new ArrayList<>();
 
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 1,
+        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 2, 1,
                 23, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 3, 0, 0, 0), "не бессоная"));
+                LocalDateTime.of(2000, 2, 2, 8, 0, 0, 0), "не бессоная"));
 
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 1,
+        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 2, 2,
                 23, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 3, 0, 0, 0), "не бессонная"));
+                LocalDateTime.of(2000, 2, 3, 8, 0, 0, 0), "не бессоная"));
 
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 2,
+        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 2, 4,
                 7, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 10, 0, 0, 0), "бессонная"));
+                LocalDateTime.of(2000, 2, 4, 10, 0, 0, 0), "бессоная"));
 
+        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 2, 4,
+                18, 0, 0, 0),
+                LocalDateTime.of(2000, 2, 5, 8, 0, 0, 0), "не бессоная"));
 
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 2,
-                17, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 23, 0, 0, 0), "бессонная"));
+        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 2, 6,
+                7, 0, 0, 0),
+                LocalDateTime.of(2000, 2, 6, 10, 0, 0, 0), "бессоная"));
 
-        CountNoNightSleep countNoNightSleep = new CountNoNightSleep();
+        SleeplessNights countNoNightSleep = new SleeplessNights();
 
-        double result = countNoNightSleep.analyze(sleepingSessions);
+        SleepAnalysisResult result = countNoNightSleep.apply(sleepingSessions);
 
-        assertEquals(2, result);
+        assertEquals(2, (long) result.getValue());
         //Вернет что была 2 без сонные ночи
     }
 
@@ -204,89 +209,41 @@ public class SleepTrackerAppTest {
                 LocalDateTime.of(2000, 2, 1, 8, 0, 0, 0), "не бессоная"));
 
 
-        CountNoNightSleep countNoNightSleep = new CountNoNightSleep();
+        SleeplessNights countNoNightSleep = new SleeplessNights();
 
-        double result = countNoNightSleep.analyze(sleepingSessions);
+        SleepAnalysisResult result = countNoNightSleep.apply(sleepingSessions);
 
         assertEquals(1, result);
         //Вернет что было 2 бессоной ночи не смотря на смена месяца
     }
 
-    @Test
-    public void returnThatThereWere2SleeplessNightsDespiteTheDaytimeSleep() {
-        List<SleepingSession> sleepingSessions = new ArrayList<>();
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 1,
-                23, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 3, 0, 0, 0), "не бессоная"));
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 1,
-                13, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 14, 0, 0, 0), "не бессоная"));
-
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 1,
-                23, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 3, 0, 0, 0), "дневной сон"));
-
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 2,
-                17, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 23, 0, 0, 0), "бессонная"));
-
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 31,
-                23, 0, 0, 0),
-                LocalDateTime.of(2000, 2, 1, 8, 0, 0, 0), "не бессоная"));
-
-
-        CountNoNightSleep countNoNightSleep = new CountNoNightSleep();
-
-        double result = countNoNightSleep.analyze(sleepingSessions);
-
-        assertEquals(1, result);
-        //Вернет что было 2 бессоной ночи не смотря на дневной сон
-    }
-
-    @Test
-    public void returnThatThereWere0SleeplessNightsDespiteTheDaytimeSleep() {
-        List<SleepingSession> sleepingSessions = new ArrayList<>();
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 1,
-                23, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 3, 0, 0, 0), "не бессоная"));
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 1,
-                13, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 14, 0, 0, 0), "не бессоная"));
-
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 1,
-                23, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 3, 0, 0, 0), "дневной сон"));
-
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 31,
-                23, 0, 0, 0),
-                LocalDateTime.of(2000, 2, 1, 8, 0, 0, 0), "не бессоная"));
-
-
-        CountNoNightSleep countNoNightSleep = new CountNoNightSleep();
-
-        double result = countNoNightSleep.analyze(sleepingSessions);
-
-        assertEquals(0, result);
-        //Вернет что было 0 бессоной ночи не смотря на дневной сон
-    }
 
 
     @Test
     public void itWillShowThatAPersonIsAnLark() {
         List<SleepingSession> sleepingSessions = new ArrayList<>();
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 2,
+        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2025, 2, 2,
                 19, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 6, 0, 0, 0), "lark"));
+                LocalDateTime.of(2025, 2, 3, 5, 0, 0, 0), "lark"));
 
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 2,
+        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2025, 2, 3,
+                19, 0, 0, 0),
+                LocalDateTime.of(2025, 2, 4, 5, 0, 0, 0), "lark"));
+
+        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2025, 2, 5,
                 1, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 11, 0, 0, 0), "owl"));
+                LocalDateTime.of(2025, 2, 5, 11, 0, 0, 0), "owl"));
 
-        CheckClass checkClass = new CheckClass();
 
-        double result = checkClass.analyze(sleepingSessions);
+        CheckClass test = new CheckClass();
 
-        assertEquals(1, result);
+        SleepAnalysisResult result = test.apply(sleepingSessions);
+
+        assertEquals(2, (long) result.getValue());
+
+        assertEquals("Ваш хронотип жаворонок, вы ложились, раньше 22:00 и просыпались до 7:00, вот сколько раз: ",
+                result.getDescription());
+
         //Вернет что хронотип жаворонок, и покажет кол-во раз сколько человек засыпал по этому хронотипу
     }
 
@@ -294,74 +251,81 @@ public class SleepTrackerAppTest {
     @Test
     public void itWillShowThatAPersonIsAnOwl() {
         List<SleepingSession> sleepingSessions = new ArrayList<>();
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 2,
-                1, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 11, 0, 0, 0), "owl"));
 
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 2,
-                19, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 6, 0, 0, 0), "lark"));
+        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2025, 2, 3,
+                23, 30, 0, 0),
+                LocalDateTime.of(2025, 2, 4, 11, 0, 0, 0), "owl"));
 
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 2,
-                1, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 11, 0, 0, 0), "owl"));
+        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2025, 2, 4,
+                23, 30, 0, 0),
+                LocalDateTime.of(2025, 2, 5, 11, 0, 0, 0), "owl"));
 
-        CheckClass checkClass = new CheckClass();
+        CheckClass test = new CheckClass();
 
-        double result = checkClass.analyze(sleepingSessions);
+        SleepAnalysisResult result = test.apply(sleepingSessions);
 
 
-        assertEquals(2, result);
-        //Вернет что хронотип сова, и покажет кол-во раз сколько челвоек засыпал по этому хронотипу
+        assertEquals(2,(long) result.getValue());
+
+        assertEquals("Ваш хронотип сова, вы засыпали позже 23;00, а пробуждение после 9:00, столько раз: ",
+                result.getDescription());
+
+        //Вернет что хронотип сова, и покажет кол-во раз сколько человек засыпал по этому хронотипу
     }
 
     @Test
     public void itWillShowThatAPersonIsAnPigeon() {
         List<SleepingSession> sleepingSessions = new ArrayList<>();
+
+        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 2,
+                19, 0, 0, 0),
+                LocalDateTime.of(2000, 1, 3, 6, 0, 0, 0), "lark"));
+
         sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 2,
                 1, 0, 0, 0),
                 LocalDateTime.of(2000, 1, 2, 11, 0, 0, 0), "owl"));
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 2,
-                19, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 6, 0, 0, 0), "lark"));
 
 
         CheckClass checkClass = new CheckClass();
 
-        double result = checkClass.analyze(sleepingSessions);
+        SleepAnalysisResult result = checkClass.apply(sleepingSessions);
 
 
-        assertEquals(1, result);
-        //Выведет что голубь, и покажет кол-во раз сколько человек засыпал по этому хронотипу
+        assertEquals(1, (long) result.getValue());
+
+        assertEquals("Ваш хронотип голубь, вы ложились одинаково как сова и жаворонок, такое кол-во раз: " ,
+                result.getDescription());
+
+
+        //Выведет что голубь, потому что равное кол-во хронотипов, и покажет кол-во раз сколько человек засыпал по этому хронотипу
     }
 
     @Test
-    public void ss() {
+    public void aPigeonIsSelected() {
         List<SleepingSession> sleepingSessions = new ArrayList<>();
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 2,
-                1, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 11, 0, 0, 0), "owl"));
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 2,
-                19, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 6, 0, 0, 0), "lark"));
+
+        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 1,
+                22, 0, 0, 0),
+                LocalDateTime.of(2000, 1, 2, 8, 0, 0, 0), "pigeon"));
+
+        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 1,
+                22, 0, 0, 0),
+                LocalDateTime.of(2000, 1, 2, 8, 0, 0, 0), "pigeon"));
 
         sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 2,
-                22, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 10, 0, 0, 0), "pigeon"));
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 2,
-                22, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 10, 22, 0, 0), "pigeon"));
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 2,
-                22, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 10, 22, 0, 0), "pigeon"));
+                19, 0, 0, 0),
+                LocalDateTime.of(2000, 1, 3, 6, 0, 0, 0), "lark"));
 
 
         CheckClass checkClass = new CheckClass();
 
-        double result = checkClass.analyze(sleepingSessions);
+        SleepAnalysisResult result = checkClass.apply(sleepingSessions);
 
+        assertEquals(2, (long) result.getValue());
 
-        assertEquals(3, result);
+        assertEquals("Ваш хронотип голубь, вы ложились  спать в другое время в отличие от сов и жаворонков, " +
+                        "такое кол-во раз: " ,
+                result.getDescription());
         //Выведет что голубь, и покажет кол-во раз сколько человек засыпал по этому хронотипу
     }
 

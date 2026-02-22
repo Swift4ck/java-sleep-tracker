@@ -1,36 +1,39 @@
 package ru.yandex.practicum.sleeptracker;
 
 
+import ANALYZERS.ANALYZERS.TotalSessions;
+import ANALYZERS.ANALYZERS.MaxDuration;
+import ANALYZERS.ANALYZERS.MinDuration;
+import ANALYZERS.ANALYZERS.AverageTimeSession;
+import ANALYZERS.ANALYZERS.SessionBadSleep;
+import ANALYZERS.ANALYZERS.SleeplessNights;
+import ANALYZERS.ANALYZERS.CheckClass;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
 public class SleepTrackerApp {
-    //Работа не сделана  до конца у меня не получается сделать последнюю  функцию, пожалуйста посмотрите и прокомментируете  что в ней не так
-    private List<SleepAnalyticsFunction> functions;
+    private static final List<Function<List<SleepingSession>, SleepAnalysisResult>> ANALYZERS = Arrays.asList(
+            new TotalSessions(),
+            new MaxDuration(),
+            new MinDuration(),
+            new AverageTimeSession(),
+            new SessionBadSleep(),
+            new SleeplessNights(),
+            new CheckClass()
+    );
 
-    public SleepTrackerApp() {
-        functions = new ArrayList<>();
-        functions.add(new SessionCountFunction());
-        functions.add(new MaxDuration());
-        functions.add(new MinDuration());
-        functions.add(new AverageTimeSession());
-        functions.add(new SessionBadSleep());
-        functions.add(new CountNoNightSleep());
-        functions.add(new CheckClass());
 
-    }
-
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) { // Переделал main как вы сказали
         SleepTrackerApp app = new SleepTrackerApp();
 
         System.out.println("Добро пожаловать в аналитику вашего сна");
@@ -45,220 +48,15 @@ public class SleepTrackerApp {
                     })
                     .collect(Collectors.toList());
 
-            app.functions.forEach(function -> {
-                if (function instanceof SessionCountFunction) {
-                    System.out.println("Количество сессий сна: " + function.analyze(sleepingSessions));
-                } else if (function instanceof MaxDuration) {
-                    System.out.println("Максимальная продолжительность сессии (в минутах): " +
-                            function.analyze(sleepingSessions));
-                } else if (function instanceof MinDuration) {
-                    System.out.println("Минимальная продолжительность ссесии (в минутах): " +
-                            function.analyze(sleepingSessions));
-                } else if (function instanceof AverageTimeSession) {
-                    System.out.println("Средняя продолжительность сессии (в минутах); " +
-                            function.analyze(sleepingSessions));
-                } else if (function instanceof SessionBadSleep) {
-                    System.out.println("Количество сессий с плохим качество сна: " +
-                            function.analyze(sleepingSessions));
-                } else if (function instanceof CountNoNightSleep) {
-                    System.out.println("Количество без сонных ночей: " + function.analyze(sleepingSessions));
-                } else if (function instanceof CheckClass) {
-                    System.out.println(function.analyze(sleepingSessions));
-                }
+            ANALYZERS.stream()
+                    .map(analyzer -> analyzer.apply(sleepingSessions))
+                    .forEach(System.out::println);
 
-            });
-
-
-        }
-
-
-    }
-
-    @FunctionalInterface
-    interface SleepAnalyticsFunction {
-        double analyze(List<SleepingSession> sessions);
-    }
-
-    static class SessionCountFunction implements SleepAnalyticsFunction {
-        @Override
-        public double analyze(List<SleepingSession> sessions) {
-            return (double) sessions.size();
-        }
-    }
-
-    static class MaxDuration implements SleepAnalyticsFunction {
-        @Override
-        public double analyze(List<SleepingSession> sessions) {
-            return sessions.stream()
-                    .mapToLong(session -> ChronoUnit.MINUTES.between(session.getStart(),
-                            session.getEnd()))
-                    .max()
-                    .orElse(0);
-
-        }
-    }
-
-    static class MinDuration implements SleepAnalyticsFunction {
-        @Override
-        public double analyze(List<SleepingSession> sessions) {
-            return sessions.stream()
-                    .mapToLong(session -> ChronoUnit.MINUTES.between(session.getStart(),
-                            session.getEnd()))
-                    .min()
-                    .orElse(0);
-
-        }
-    }
-
-    static class AverageTimeSession implements SleepAnalyticsFunction {
-        @Override
-        public double analyze(List<SleepingSession> sessions) {
-            return sessions.stream()
-                    .mapToLong(session -> ChronoUnit.MINUTES.between(session.getStart(),
-                            session.getEnd()))
-                    .average()
-                    .orElse(0.0);
-        }
-    }
-
-    static class SessionBadSleep implements SleepAnalyticsFunction {
-        @Override
-        public double analyze(List<SleepingSession> sessions) {
-            return sessions.stream()
-                    .filter(sleepingSession -> sleepingSession.getStatus().equals("BAD"))
-                    .count();
-        }
-    }
-
-
-    static class CountNoNightSleep implements SleepAnalyticsFunction {
-        @Override
-        public double analyze(List<SleepingSession> sessions) {
-
-            return sessions.stream()
-                    .filter(session -> {
-                        LocalDateTime start = session.getStart();
-                        LocalDateTime end = session.getEnd();
-
-                        LocalDateTime nextDay = session.getStart().toLocalDate().plusDays(1).atTime(0, 0);
-
-
-                        return !(end.isAfter(nextDay));
-                    })
-                    .count();
-        }
-    }
-
-    //Эта функция не работает правильно, и я пока что не могу понять почему, пожалуйста дайте комментарии  в чем я ошибся тут
-    static class CheckClass implements SleepAnalyticsFunction {
-        @Override
-        public double analyze(List<SleepingSession> sessions) {
-
-            long owlCount = sessions.stream()
-                    .filter(session -> {
-                        LocalTime start = session.getStart().toLocalTime();
-                        LocalTime end = session.getEnd().toLocalTime();
-
-                        LocalTime dayStartSleep = LocalTime.of(12, 0);
-                        LocalTime dayEndSleep = LocalTime.of(18, 0);
-
-                        return (dayStartSleep.isAfter(start) && dayEndSleep.isBefore(end)) ||
-                                (dayStartSleep.isAfter(start) && dayEndSleep.isAfter(end)) ||
-                                (dayStartSleep.isBefore(start) && dayEndSleep.isBefore(end));
-                    })
-                    .filter(session -> {
-                        LocalDateTime start = session.getStart();
-                        LocalDateTime end = session.getEnd();
-
-                        LocalDateTime nextDay = session.getStart().toLocalDate().plusDays(1).atTime(0, 0);
-
-
-                        return (end.isAfter(nextDay));
-                    })
-                    .filter(session -> {
-                        LocalDateTime start = session.getStart();
-                        LocalDateTime end = session.getEnd();
-
-                        LocalDateTime startOwl = session.getStart().withHour(22);
-                        LocalDateTime endOwl = session.getEnd().withHour(6);
-
-
-                        return start.isAfter(startOwl) && end.isAfter(endOwl);
-                    })
-                    .count();
-
-
-            long larkCount = sessions.stream()
-                    .filter(session -> {
-                        LocalTime start = session.getStart().toLocalTime();
-                        LocalTime end = session.getEnd().toLocalTime();
-
-                        LocalTime dayStartSleep = LocalTime.of(12, 0);
-                        LocalTime dayEndSleep = LocalTime.of(18, 0);
-
-                        return (dayStartSleep.isAfter(start) && dayEndSleep.isBefore(end)) ||
-                                (dayStartSleep.isAfter(start) && dayEndSleep.isAfter(end)) ||
-                                (dayStartSleep.isBefore(start) && dayEndSleep.isBefore(end));
-                    })
-                    .filter(session -> {
-                        LocalDateTime start = session.getStart();
-                        LocalDateTime end = session.getEnd();
-
-                        LocalDateTime nextDay = session.getStart().toLocalDate().plusDays(1).atTime(0, 0);
-
-
-                        return (end.isAfter(nextDay));
-                    })
-                    .filter(session -> {
-                        LocalDateTime start = session.getStart();
-                        LocalDateTime end = session.getEnd();
-
-                        LocalDateTime startLark = session.getStart().withHour(22);
-                        LocalDateTime endLark = session.getEnd().withHour(6);
-
-                        return start.isBefore(startLark) && end.isBefore(endLark);
-                    })
-                    .count();
-
-            long pigeonCount = sessions.stream()
-                    .filter(session -> {
-                        LocalTime start = session.getStart().toLocalTime();
-                        LocalTime end = session.getEnd().toLocalTime();
-
-                        LocalTime dayStartSleep = LocalTime.of(12, 0);
-                        LocalTime dayEndSleep = LocalTime.of(18, 0);
-
-                        return (dayStartSleep.isAfter(start) && dayEndSleep.isBefore(end)) ||
-                                (dayStartSleep.isAfter(start) && dayEndSleep.isAfter(end)) ||
-                                (dayStartSleep.isBefore(start) && dayEndSleep.isBefore(end));
-                    })
-                    .filter(session -> {
-                        LocalDateTime start = session.getStart();
-                        LocalDateTime end = session.getEnd();
-
-                        LocalDateTime nextDay = session.getStart().toLocalDate().plusDays(1).atTime(0, 0);
-
-
-                        return (end.isAfter(nextDay));
-                    })
-                    .count() + sessions.size() - (owlCount + larkCount);
-
-
-            if (owlCount > larkCount && owlCount > pigeonCount) {
-                System.out.print("Ваш хронотип сова, вы засыпали позже 23;00, а пробуждение после 9:00, столько раз: ");
-                return owlCount;
-            } else if (larkCount > owlCount && larkCount > pigeonCount) {
-                System.out.print("Ваш хронотип жаворонок, вы ложились, раньше 22:00 " +
-                        "и просыпались до 7:00, вот сколько раз ");
-                return larkCount;
-            } else if (pigeonCount > larkCount && pigeonCount > owlCount) {
-                System.out.print("Ваш хронотип голубь, вы ложились  спать в другое время в " +
-                        "отличие от сов и жаворонков, такое кол-во раз: ");
-                return pigeonCount;
-            } else {
-                System.out.print("Ваш хронотип голубь, вы ложились одинаково как сова и жаворонок, такое кол-во раз: ");
-                return pigeonCount + owlCount;
-            }
+        } catch (IOException e) {
+            System.err.println("Файл не найден: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Ошибка: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
