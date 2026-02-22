@@ -1,4 +1,5 @@
 package ru.yandex.practicum.sleeptracker;
+
 import ANALYZERS.ANALYZERS;
 
 import java.time.LocalDateTime;
@@ -36,8 +37,6 @@ public class SleepingSession {
         LocalDateTime end = getEnd(); //выставляем конец сесси сна
 
 
-
-
         LocalDateTime nightStart = start.toLocalDate().atStartOfDay(); //Старт ночи с 00:00 и тут используется  метод
         //вместо ручного выставления как я делал
 
@@ -54,9 +53,6 @@ public class SleepingSession {
         }
         return false;
     }// посути этот метод првоеряет явялется ли сессия сна ночной, если да то возрашает ложь, если сессия ночная то истина
-
-
-
 
 
 }

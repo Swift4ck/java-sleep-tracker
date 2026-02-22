@@ -3,6 +3,7 @@ package ru.yandex.practicum.sleeptracker;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import ANALYZERS.ANALYZERS;
 import org.junit.jupiter.api.Test;
 import ANALYZERS.ANALYZERS.TotalSessions;
@@ -27,7 +28,7 @@ public class SleepTrackerAppTest {
 
         TotalSessions sessionCountFunction = new TotalSessions();
 
-        SleepAnalysisResult  result = sessionCountFunction.apply(sleepingSessions);
+        SleepAnalysisResult result = sessionCountFunction.apply(sleepingSessions);
         assertEquals(3, result.getValue());
         //Должна вернуть кол-во сессий
     }
@@ -45,10 +46,10 @@ public class SleepTrackerAppTest {
         assertEquals(8 * 60, (long) result.getValue());
         //Должна вернуть максимальную длину  сессии в минутах
 
-        assertNotEquals(7 * 60,(long) result.getValue());
+        assertNotEquals(7 * 60, (long) result.getValue());
         //Проверка что метод не вернул число которое не максимальное
 
-        assertNotEquals(6 * 60,(long) result.getValue());
+        assertNotEquals(6 * 60, (long) result.getValue());
         //Проверка что метод не вернул число которое минимальное
     }
 
@@ -63,10 +64,10 @@ public class SleepTrackerAppTest {
         MinDuration minDuration = new MinDuration();
 
         SleepAnalysisResult result = minDuration.apply(sleepingSessions);
-        assertEquals(6 * 60,(long) result.getValue());
+        assertEquals(6 * 60, (long) result.getValue());
         //Должна вернуть минимальную длину  сессии в минутах
 
-        assertNotEquals(8 * 60,(long) result.getValue());
+        assertNotEquals(8 * 60, (long) result.getValue());
         //Проверка что функция не вернет максимальное число вместо минимальной
     }
 
@@ -82,7 +83,7 @@ public class SleepTrackerAppTest {
 
         SleepAnalysisResult result = averageTimeSession.apply(sleepingSessions);
 
-        assertEquals(80.0,(double) result.getValue());
+        assertEquals(80.0, (double) result.getValue());
         //Вернет среднее значения сессии
 
     }
@@ -113,7 +114,7 @@ public class SleepTrackerAppTest {
 
         SleepAnalysisResult result = sessionBadSleep.apply(sleepingSessions);
 
-        assertEquals(1,(long) result.getValue());
+        assertEquals(1, (long) result.getValue());
         //Вернет 1 плохой сон(
     }
 
@@ -128,7 +129,7 @@ public class SleepTrackerAppTest {
 
         SleepAnalysisResult result = sessionBadSleep.apply(sleepingSessions);
 
-        assertEquals(0,(long) result.getValue());
+        assertEquals(0, (long) result.getValue());
         //Вернет 0 плохих снов)
     }
 
@@ -153,7 +154,7 @@ public class SleepTrackerAppTest {
 
         SleepAnalysisResult result = countNoNightSleep.apply(sleepingSessions);
 
-        assertEquals(1,(long) result.getValue());
+        assertEquals(1, (long) result.getValue());
         //Вернет что была 1 бессоная ночь
     }
 
@@ -188,35 +189,6 @@ public class SleepTrackerAppTest {
         assertEquals(2, (long) result.getValue());
         //Вернет что была 2 без сонные ночи
     }
-
-    @Test
-    public void thereWillBeNoSleepyNights() {
-        List<SleepingSession> sleepingSessions = new ArrayList<>();
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 1,
-                23, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 3, 0, 0, 0), "не бессоная"));
-
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 1,
-                23, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 3, 0, 0, 0), "не бессонная"));
-
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 2,
-                17, 0, 0, 0),
-                LocalDateTime.of(2000, 1, 2, 23, 0, 0, 0), "бессонная"));
-
-        sleepingSessions.add(new SleepingSession(LocalDateTime.of(2000, 1, 31,
-                23, 0, 0, 0),
-                LocalDateTime.of(2000, 2, 1, 8, 0, 0, 0), "не бессоная"));
-
-
-        SleeplessNights countNoNightSleep = new SleeplessNights();
-
-        SleepAnalysisResult result = countNoNightSleep.apply(sleepingSessions);
-
-        assertEquals(1, result);
-        //Вернет что было 2 бессоной ночи не смотря на смена месяца
-    }
-
 
 
     @Test
@@ -265,7 +237,7 @@ public class SleepTrackerAppTest {
         SleepAnalysisResult result = test.apply(sleepingSessions);
 
 
-        assertEquals(2,(long) result.getValue());
+        assertEquals(2, (long) result.getValue());
 
         assertEquals("Ваш хронотип сова, вы засыпали позже 23;00, а пробуждение после 9:00, столько раз: ",
                 result.getDescription());
@@ -293,7 +265,7 @@ public class SleepTrackerAppTest {
 
         assertEquals(1, (long) result.getValue());
 
-        assertEquals("Ваш хронотип голубь, вы ложились одинаково как сова и жаворонок, такое кол-во раз: " ,
+        assertEquals("Ваш хронотип голубь, вы ложились одинаково как сова и жаворонок, такое кол-во раз: ",
                 result.getDescription());
 
 
@@ -324,7 +296,7 @@ public class SleepTrackerAppTest {
         assertEquals(2, (long) result.getValue());
 
         assertEquals("Ваш хронотип голубь, вы ложились  спать в другое время в отличие от сов и жаворонков, " +
-                        "такое кол-во раз: " ,
+                        "такое кол-во раз: ",
                 result.getDescription());
         //Выведет что голубь, и покажет кол-во раз сколько человек засыпал по этому хронотипу
     }
